@@ -4,6 +4,7 @@
   "description": "---fill-this---",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon index.js",
     "test": "env AZURE_NODE_ENV=development env NODE_ENV=development npx mocha --exit"
   },
   "keywords": [],
@@ -24,5 +25,14 @@
     "jscpd": "^3.5.4",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "mongodb-memory-server": "^9.1.6",
+    "mongoose": "^8.2.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^6.3.4"
   }
 }
