@@ -7,7 +7,7 @@ async function createConnector(connectorData) {
     const connector = await Connector.create(connectorData);
     return connector;
   } catch (error) {
-    console.error('Error creating connector:', error);
+    console.error('Error creating connector:', error.message);
     throw error;
   }
 }
@@ -26,7 +26,6 @@ async function getConnectorById(connectorObjId) {
   try {
     const connector = await Connector.findById(connectorObjId);
     if (!connector) {
-      console.log(`Connector with ID ${connectorObjId} not found`);
       return null;
     }
     return connector;

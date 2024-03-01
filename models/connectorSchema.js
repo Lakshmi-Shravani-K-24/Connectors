@@ -9,7 +9,7 @@ const connectorSchema = new mongoose.Schema({
   status: {type: String, required: true},
   chargePointId: {type: String, required: true},
   chargeStationName: {type: String, required: true},
-  address: String,
+  address: {city: String, pincode: Number},
   location: {
     type: {
       type: String,
@@ -26,7 +26,6 @@ const connectorSchema = new mongoose.Schema({
 connectorSchema.pre('save', async function(next) {
   const doc = this;
   const requiredFields = ['connectorId', 'type', 'status', 'chargePointId', 'chargeStationName', 'location'];
-
   // Check if all required fields are present
   const missingFields = requiredFields.filter((field) => !doc[field]);
   if (missingFields.length > 0) {
