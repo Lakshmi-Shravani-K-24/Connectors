@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const express = require('express');
 const router = express.Router();
 const {
@@ -12,8 +13,8 @@ const {
 // Create a new connector
 router.post('/connectors', async (req, res) => {
   try {
-    const connector = await createConnector(req.body);
-    res.status(201).json(connector);
+    const createdconnector = await createConnector(req.body);
+    res.status(201).json(createdconnector);
   } catch (error) {
     res.status(400).json({'error': error.message, 'Invalid data': req.body});
   }
@@ -21,7 +22,7 @@ router.post('/connectors', async (req, res) => {
 // Get all connectors
 router.get('/connectors', async (req, res) => {
   try {
-    const allconnectors = await getConnectors();
+    const allconnectors = await getConnectors({});
     res.json(allconnectors);
   } catch (error) {
     res.status(500).json({error: 'Internal Server Error. Cannot get connectors'});
@@ -32,6 +33,7 @@ router.get('/connectors/:id', async (req, res) => {
   try {
     const connector = await getConnectorById(req.params.id);
     if (!connector) {
+      console.log('Connector not found');
       return res.status(404).json({error: 'Connector not found'});
     }
     res.json(connector);
@@ -46,8 +48,8 @@ router.get('/connectors/location/:latitude/:longitude/:maxDistance', async (req,
     const longitude = parseFloat(req.params.longitude);
     const maxDistance = parseInt(req.params.maxDistance);
 
-    const connectors1 = await getConnectorsByLocation(latitude, longitude, maxDistance);
-    res.json(connectors1);
+    const connectorsNearGivenLocation = await getConnectorsByLocation(latitude, longitude, maxDistance);
+    res.json(connectorsNearGivenLocation);
   } catch (error) {
     res.status(500).json({error: 'Internal Server Error. Cannot get connectors by location'});
   }

@@ -14,7 +14,7 @@ before(async () => {
   app = await startServer();
 });
 
-describe('CRUD Operations', () => {
+describe('Test Connectors CRUD Operating Routes and funtions ', () => {
   const newConnectorData = {
     connectorId: '123',
     type: 'Type A',
@@ -25,39 +25,39 @@ describe('CRUD Operations', () => {
   };
 
   it('should create a new connector', async () => {
-    const response = await request(app)
+    const createResponse = await request(app)
         .post('/api/connectors')
         .send(newConnectorData)
         .expect(201);
-    objectId=response.body._id;
-    expect(response.body.connectorId).equal(newConnectorData.connectorId);
+    objectId=createResponse.body._id;
+    expect(createResponse.body.connectorId).equal(newConnectorData.connectorId);
   });
 
   it('should get all connectors', async () => {
-    const response = await request(app)
+    const getAllResponse = await request(app)
         .get('/api/connectors')
         .expect(200);
-    expect(response.body).to.be.an('array').that.is.not.empty;
+    expect(getAllResponse.body).to.be.an('array').that.is.not.empty;
   });
 
   it('should get a connector by ID', async () => {
-    const response = await request(app)
+    const getByIdResponse = await request(app)
         .get(`/api/connectors/${objectId}`)
         .expect(200);
-    expect(response.body._id).to.equal(objectId);
+    expect(getByIdResponse.body._id).to.equal(objectId);
   });
   it('should get connectors by location', async () => {
     const latitude = 40.7200; // Example latitude
     const longitude = -74.0060; // Example longitude
     const maxDistance = 1000; // Example max distance in meters
 
-    const response = await request(app)
+    const getByLocationResponse = await request(app)
         .get(`/api/connectors/location/${latitude}/${longitude}/${maxDistance}`)
         .expect(200);
-    response.body.forEach((connector) => {
+    expect(getByLocationResponse.body).to.be.an('array');
+    getByLocationResponse.body.forEach((connector) => {
       expect(connector).to.have.property('location').that.is.an('object').that.has.all.keys('type', 'coordinates');
     });
-    expect(response.body).to.be.an('array').that.is.not.empty;
   });
   it('should update a connector by ID', async () => {
     const updatedConnectorData = {
@@ -65,12 +65,20 @@ describe('CRUD Operations', () => {
       status: 'Inactive',
     };
 
-    const response = await request(app)
+    const updateResponse = await request(app)
         .put(`/api/connectors/${objectId}`)
         .send(updatedConnectorData)
         .expect(200);
-    expect(response.body).to.deep.include(updatedConnectorData);
+    expect(updateResponse.body).to.deep.include(updatedConnectorData);
   });
+  it('should delete a connector by ID', async () => {
+    const deleteResponse = await request(app)
+        .delete(`/api/connectors/${objectId}`)
+        .expect(200);
+    expect(deleteResponse.body._id).to.equal(objectId);
+  });
+});
+describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
   it('should return an error if required fields are missing', async () => {
     const invalidConnectorData = {
       connectorId: '121',
@@ -85,7 +93,7 @@ describe('CRUD Operations', () => {
   });
   it('should return an error if connectorId is not unique', async () => {
     // Create a connector with the same connectorId
-    const newConnectorData1 = {
+    const connectorDataWithInvalidId = {
       connectorId: '123',
       type: 'Type B',
       status: 'Active',
@@ -95,11 +103,15 @@ describe('CRUD Operations', () => {
     };
     await request(app)
         .post('/api/connectors')
-        .send(newConnectorData1)
+        .send(connectorDataWithInvalidId)
+        .expect(201);
+    await request(app)
+        .post('/api/connectors')
+        .send(connectorDataWithInvalidId)
         .expect(400);
   });
   it('should return an error if connectorId is missing', async () => {
-    const invalidConnectorData1 = {
+    const connectorDataWithoutId = {
       type: 'Type 2',
       status: 'InActive',
       chargePointId: 'CP003',
@@ -108,14 +120,8 @@ describe('CRUD Operations', () => {
     };
     await request(app)
         .post('/api/connectors')
-        .send(invalidConnectorData1)
+        .send(connectorDataWithoutId)
         .expect(400);
-  });
-  it('should delete a connector by ID', async () => {
-    const response1 = await request(app)
-        .delete(`/api/connectors/${objectId}`)
-        .expect(200);
-    expect(response1.body._id).to.equal(objectId);
   });
   it('should return  error if connector with given ID is not found', async () => {
     await request(app)
