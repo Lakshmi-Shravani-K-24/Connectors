@@ -2,21 +2,20 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const {MongoMemoryServer} = require('mongodb-memory-server');
-const connectorRoutes = require('./routes/connectorRoutes.js');
+const connectorRoutes = require('./routes/connectorRoutes');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Initialize the MongoDB in-memory server
+let mongoServer;
+
 async function startDatabase() {
-  const mongod = new MongoMemoryServer();
-  await mongod.start();
-  const uri = mongod.getUri();
-  await mongoose.connect(uri);
+  mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
+  await mongoose.connect(mongoUri);
   console.log('Connected to the in-memory database');
 }
 
-// Start the Express server
 function startServer() {
   const app = express();
   app.use(bodyParser.json());
@@ -24,22 +23,31 @@ function startServer() {
   app.use('/api', connectorRoutes);
 
   const port = process.env.PORT || 3000;
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
   });
 
-  return app; // Return the app object
+  return server;
 }
 
-// Start the application
-async function main() {
-  try {
-    await startDatabase();
-    // startServer(); use when  running outside of tests
-  } catch (error) {
-    console.error('Error starting the application:', error);
-  }
+function stopServer(server) {
+  server.close(() => {
+    console.log('Server stopped');
+  });
 }
+
+async function stopDatabase() {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+  console.log('Disconnected from the in-memory database');
+}
+
+async function main() {
+  // Uncomment below two lines if you want to start the server when not running tests
+  // await startDatabase();
+  // startServer();
+}
+
 main();
 
-module.exports = startServer; // Export the startServer function
+module.exports = {startServer, stopServer, startDatabase, stopDatabase};

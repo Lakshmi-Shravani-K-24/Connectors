@@ -1,17 +1,20 @@
 /* eslint-disable max-len */
 const request = require('supertest');
-// const mongoose = require('mongoose');
 const {expect} = require('chai');
-// const {MongoMemoryServer} = require('mongodb-memory-server');
-const {before, describe, it} = require('mocha');
+const {before, describe, it, after} = require('mocha');
+const {startServer, stopServer, startDatabase, stopDatabase} = require('../index');
 
-const startServer = require('../index'); // Import the startServer function
 
 let objectId;
 let app;
 
 before(async () => {
+  await startDatabase();
   app = await startServer();
+});
+after(async () => {
+  stopServer(app);
+  await stopDatabase();
 });
 
 describe('Test Connectors CRUD Operating Routes and funtions ', () => {

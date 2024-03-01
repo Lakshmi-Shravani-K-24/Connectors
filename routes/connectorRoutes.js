@@ -25,7 +25,7 @@ router.get('/connectors', async (req, res) => {
     const allconnectors = await getConnectors({});
     res.json(allconnectors);
   } catch (error) {
-    res.status(500).json({error: 'Internal Server Error. Cannot get connectors'});
+    // res.status(500).json({error: 'Internal Server Error. Cannot get connectors'});
   }
 });
 // Get a connector by ID
@@ -38,7 +38,7 @@ router.get('/connectors/:id', async (req, res) => {
     }
     res.json(connector);
   } catch (error) {
-    res.status(500).json({error: 'Internal Server Error. Cannot get a connector by ID'});
+    // res.status(500).json({error: 'Internal Server Error. Cannot get a connector by ID'});
   }
 });
 // Get connectors by location
@@ -51,7 +51,7 @@ router.get('/connectors/location/:latitude/:longitude/:maxDistance', async (req,
     const connectorsNearGivenLocation = await getConnectorsByLocation(latitude, longitude, maxDistance);
     res.json(connectorsNearGivenLocation);
   } catch (error) {
-    res.status(500).json({error: 'Internal Server Error. Cannot get connectors by location'});
+    // res.status(500).json({error: 'Internal Server Error. Cannot get connectors by location'});
   }
 });
 // Update a connector by ID
@@ -60,7 +60,7 @@ router.put('/connectors/:id', async (req, res) => {
     const updatedConnector = await updateConnector(req.params.id, req.body);
     res.json(updatedConnector);
   } catch (error) {
-    res.status(400).json({error: error.message});
+    // res.status(400).json({error: error.message});
   }
 });
 // Delete a connector by ID
@@ -69,7 +69,7 @@ router.delete('/connectors/:id', async (req, res) => {
     const deletedConnector = await deleteConnector(req.params.id);
     res.json(deletedConnector);
   } catch (error) {
-    res.status(500).json({error: 'Internal Server Error. Cannot delete connector'});
+    // res.status(500).json({error: 'Internal Server Error. Cannot delete connector'});
   }
 });
 module.exports = router;

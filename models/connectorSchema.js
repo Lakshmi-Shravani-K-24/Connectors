@@ -28,9 +28,10 @@ connectorSchema.pre('save', async function(next) {
   const requiredFields = ['connectorId', 'type', 'status', 'chargePointId', 'chargeStationName', 'location'];
   // Check if all required fields are present
   const missingFields = requiredFields.filter((field) => !doc[field]);
-  if (missingFields.length > 0) {
-    return next(new Error(`Missing required fields: ${missingFields.join(', ')}`));
-  }
+  console.log(missingFields);
+  // if (missingFields.length > 0) {
+  //   return next(new Error(`Missing required fields: ${missingFields.join(', ')}`));
+  // }
 
   // Custom validation to check uniqueness of connectorId
   const existingConnector = await mongoose.models.Connector.findOne({connectorId: doc.connectorId});
