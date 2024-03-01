@@ -21,7 +21,7 @@ const connectorSchema = new mongoose.Schema({
     },
   },
 });
-
+connectorSchema.index({location: '2dsphere'});
 // Pre-save middleware function to validate fields
 connectorSchema.pre('save', async function(next) {
   const doc = this;

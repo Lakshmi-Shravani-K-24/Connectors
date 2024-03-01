@@ -13,9 +13,9 @@ async function createConnector(connectorData) {
 }
 
 // Read operation
-async function getConnectors() {
+async function getConnectors(query) {
   try {
-    const connectors = await Connector.find();
+    const connectors = await Connector.find({query});
     return connectors;
   } catch (error) {
     console.error('Error getting connectors:', error);
@@ -34,6 +34,26 @@ async function getConnectorById(connectorObjId) {
     throw error;
   }
 }
+async function getConnectorsByLocation(latitude, longitude, maxDistance) {
+  try {
+    const connectors = await Connector.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude], // Note: MongoDB requires coordinates in [longitude, latitude] order
+          },
+          $maxDistance: maxDistance, // in meters
+        },
+      },
+    });
+    return connectors;
+  } catch (error) {
+    console.error('Error getting connectors by location:', error);
+    throw error;
+  }
+}
+
 
 // Update operation
 async function updateConnector(connectorObjId, newData) {
@@ -61,6 +81,7 @@ module.exports = {
   createConnector,
   getConnectors,
   getConnectorById,
+  getConnectorsByLocation,
   updateConnector,
   deleteConnector,
 };
