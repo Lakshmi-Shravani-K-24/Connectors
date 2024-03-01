@@ -21,8 +21,8 @@ router.post('/connectors', async (req, res) => {
 // Get all connectors
 router.get('/connectors', async (req, res) => {
   try {
-    const connectors = await getConnectors();
-    res.json(connectors);
+    const allconnectors = await getConnectors();
+    res.json(allconnectors);
   } catch (error) {
     res.status(500).json({error: 'Internal Server Error. Cannot get connectors'});
   }
@@ -46,8 +46,8 @@ router.get('/connectors/location/:latitude/:longitude/:maxDistance', async (req,
     const longitude = parseFloat(req.params.longitude);
     const maxDistance = parseInt(req.params.maxDistance);
 
-    const connectors = await getConnectorsByLocation(latitude, longitude, maxDistance);
-    res.json(connectors);
+    const connectors1 = await getConnectorsByLocation(latitude, longitude, maxDistance);
+    res.json(connectors1);
   } catch (error) {
     res.status(500).json({error: 'Internal Server Error. Cannot get connectors by location'});
   }

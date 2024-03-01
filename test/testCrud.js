@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const request = require('supertest');
 // const mongoose = require('mongoose');
 const {expect} = require('chai');
@@ -53,6 +54,9 @@ describe('CRUD Operations', () => {
     const response = await request(app)
         .get(`/api/connectors/location/${latitude}/${longitude}/${maxDistance}`)
         .expect(200);
+    response.body.forEach((connector) => {
+      expect(connector).to.have.property('location').that.is.an('object').that.has.all.keys('type', 'coordinates');
+    });
     expect(response.body).to.be.an('array').that.is.not.empty;
   });
   it('should update a connector by ID', async () => {
@@ -108,10 +112,10 @@ describe('CRUD Operations', () => {
         .expect(400);
   });
   it('should delete a connector by ID', async () => {
-    const response = await request(app)
+    const response1 = await request(app)
         .delete(`/api/connectors/${objectId}`)
         .expect(200);
-    expect(response.body._id).to.equal(objectId);
+    expect(response1.body._id).to.equal(objectId);
   });
   it('should return  error if connector with given ID is not found', async () => {
     await request(app)
