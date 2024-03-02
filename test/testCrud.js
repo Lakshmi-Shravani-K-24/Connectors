@@ -1,9 +1,25 @@
 /* eslint-disable max-len */
 const request = require('supertest');
 const {expect} = require('chai');
-const {before, describe, it, after} = require('mocha');
+const assert = require('assert');
+const mongoose = require('mongoose');
+const {before, describe, it, after, beforeEach, afterEach} = require('mocha');
 const {startServer, stopServer, startDatabase, stopDatabase} = require('../index');
 
+// Capture console output
+let consoleOutput = [];
+const originalConsoleLog = console.log;
+
+beforeEach(function() {
+  console.log = function(message) {
+    consoleOutput.push(message);
+  };
+});
+
+afterEach(function() {
+  console.log = originalConsoleLog; // Restore original console.log
+  consoleOutput = []; // Clear console output after each test
+});
 
 let objectId;
 let app;
@@ -12,9 +28,21 @@ before(async () => {
   await startDatabase();
   app = await startServer();
 });
+
 after(async () => {
   stopServer(app);
   await stopDatabase();
+});
+
+describe('Server and Database Start Tests', function() {
+  it('should check if the server is started', function() {
+    assert(app, 'Server is not started');
+  });
+
+  it('should check if the database is connected', function() {
+    const isConnected = mongoose.connection.readyState === 1;
+    assert(isConnected, 'Database is not connected');
+  });
 });
 
 describe('Test Connectors CRUD Operating Routes and funtions ', () => {
@@ -32,6 +60,7 @@ describe('Test Connectors CRUD Operating Routes and funtions ', () => {
         .post('/api/connectors')
         .send(newConnectorData)
         .expect(201);
+    assert(createResponse, 'Database is not connected');
     objectId=createResponse.body._id;
     expect(createResponse.body.connectorId).equal(newConnectorData.connectorId);
   });
@@ -78,6 +107,7 @@ describe('Test Connectors CRUD Operating Routes and funtions ', () => {
     const deleteResponse = await request(app)
         .delete(`/api/connectors/${objectId}`)
         .expect(200);
+    assert(deleteResponse, 'Database is not connected');
     expect(deleteResponse.body._id).to.equal(objectId);
   });
 });
