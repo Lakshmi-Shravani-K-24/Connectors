@@ -2,50 +2,46 @@
 const request = require('supertest');
 const {expect} = require('chai');
 const assert = require('assert');
+const sinon = require('sinon');
 const mongoose = require('mongoose');
-const {before, describe, it, after, beforeEach, afterEach} = require('mocha');
-const {startServer, stopServer, startDatabase, stopDatabase} = require('../index');
-
-// Capture console output
-let consoleOutput = [];
-const originalConsoleLog = console.log;
-
-beforeEach(function() {
-  console.log = function(message) {
-    consoleOutput.push(message);
-  };
-});
-
-afterEach(function() {
-  console.log = originalConsoleLog; // Restore original console.log
-  consoleOutput = []; // Clear console output after each test
-});
+const {before, describe, it, after} = require('mocha');
+const {startServer, startDatabase, stopServer, stopDatabase} = require('../index');
 
 let objectId;
 let app;
+let consoleLogStub;
 
 before(async () => {
+  consoleLogStub = sinon.stub(console, 'log');
   await startDatabase();
-  app = await startServer();
+  app = startServer();
 });
 
 after(async () => {
   stopServer(app);
   await stopDatabase();
+  consoleLogStub.restore();
+
+  // Assertions for server and database stopped messages
+  sinon.assert.calledWith(consoleLogStub, 'Server stopped');
+  sinon.assert.calledWith(consoleLogStub, 'Disconnected from the in-memory database');
 });
 
 describe('Server and Database Start Tests', function() {
-  it('should check if the server is started', function() {
+  it('should check if the server is started and message is logged', function() {
     assert(app, 'Server is not started');
+    sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3000');
   });
 
-  it('should check if the database is connected', function() {
+  it('should check if the database is connected and message is logged', function() {
     const isConnected = mongoose.connection.readyState === 1;
     assert(isConnected, 'Database is not connected');
+    sinon.assert.calledWith(consoleLogStub, 'Connected to the in-memory database');
   });
 });
 
-describe('Test Connectors CRUD Operating Routes and funtions ', () => {
+
+describe('Connectors CRUD Operating Routes and funtions Tests', () => {
   const newConnectorData = {
     connectorId: '123',
     type: 'Type A',
