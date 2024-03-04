@@ -25,14 +25,6 @@ connectorSchema.index({location: '2dsphere'});
 // Pre-save middleware function to validate fields
 connectorSchema.pre('save', async function(next) {
   const doc = this;
-  // const requiredFields = ['connectorId', 'type', 'status', 'chargePointId', 'chargeStationName', 'location'];
-  // Check if all required fields are present
-  // const missingFields = requiredFields.filter((field) => !doc[field]);
-  // console.log(missingFields);
-  // if (missingFields.length > 0) {
-  //   return next(new Error(`Missing required fields: ${missingFields.join(', ')}`));
-  // }
-
   // Custom validation to check uniqueness of connectorId
   const existingConnector = await mongoose.models.Connector.findOne({connectorId: doc.connectorId});
   if (existingConnector) {
