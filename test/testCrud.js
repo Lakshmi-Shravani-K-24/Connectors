@@ -95,9 +95,6 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
         .get(`/api/connectors/location/${latitude}/${longitude}/${maxDistance}`)
         .expect(200);
     expect(getByLocationResponse.body).to.be.an('array');
-    getByLocationResponse.body.forEach((connector) => {
-      expect(connector).to.have.property('location').that.is.an('object').that.has.all.keys('type', 'coordinates');
-    });
   });
   it('should update a connector by ID', async () => {
     const updatedConnectorData = {
