@@ -5,26 +5,37 @@ const assert = require('assert');
 const sinon = require('sinon');
 const mongoose = require('mongoose');
 const {before, describe, it, after} = require('mocha');
-const {startServer, startDatabase, stopServer, stopDatabase} = require('../index');
+const {startServer, stopServer} = require('../index');
+const {connectToDatabase, closeDatabaseConnection} = require('../db');
+const {MongoMemoryServer} = require('mongodb-memory-server');
+require('dotenv').config();
 
+let mongoServer;
 let objectId;
 let app;
 let consoleLogStub;
 
 before(async () => {
   consoleLogStub = sinon.stub(console, 'log');
-  await startDatabase();
+  mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
+  process.env.MONGODB_URL = mongoUri;
+  await connectToDatabase(process.env.MONGODB_URL);
   app = startServer();
 });
 
 after(async () => {
+  consoleLogStub = sinon.stub(console, 'log');
   stopServer(app);
-  await stopDatabase();
+  await closeDatabaseConnection();
+  await mongoServer.stop();
+  // Reset process.env.MONGODB_URL to the real MongoDB URL from .env file
+  process.env.MONGODB_URL = 'mongodb://localhost:27017/mydatabase';
   consoleLogStub.restore();
 
   // Assertions for server and database stopped messages
   sinon.assert.calledWith(consoleLogStub, 'Server stopped');
-  sinon.assert.calledWith(consoleLogStub, 'Disconnected from the in-memory database');
+  sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
 });
 
 describe('Server and Database Start Tests', function() {
@@ -36,7 +47,7 @@ describe('Server and Database Start Tests', function() {
   it('should check if the database is connected and message is logged', function() {
     const isConnected = mongoose.connection.readyState === 1;
     assert(isConnected, 'Database is not connected');
-    sinon.assert.calledWith(consoleLogStub, 'Connected to the in-memory database');
+    sinon.assert.calledWith(consoleLogStub, 'Connected to Database');
   });
 });
 
@@ -65,6 +76,7 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
     const getAllResponse = await request(app)
         .get('/api/connectors')
         .expect(200);
+    consoleLogStub.restore();
     expect(getAllResponse.body).to.be.an('array').that.is.not.empty;
   });
 
@@ -75,9 +87,9 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
     expect(getByIdResponse.body._id).to.equal(objectId);
   });
   it('should get connectors by location', async () => {
-    const latitude = 40.7200; // Example latitude
-    const longitude = -74.0060; // Example longitude
-    const maxDistance = 1000; // Example max distance in meters
+    const latitude =23; // Example latitude
+    const longitude = 22; // Example longitude
+    const maxDistance = 100; // Example max distance in meters
 
     const getByLocationResponse = await request(app)
         .get(`/api/connectors/location/${latitude}/${longitude}/${maxDistance}`)
@@ -123,12 +135,12 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
   it('should return an error if connectorId is not unique', async () => {
     // Create a connector with the same connectorId
     const connectorDataWithInvalidId = {
-      connectorId: '123',
+      connectorId: '133',
       type: 'Type B',
       status: 'Active',
-      chargePointId: 'CP002',
-      chargeStationName: 'Station 2',
-      location: {coordinates: [1, 1]},
+      chargePointId: 'CS4CP002',
+      chargeStationName: 'Station 4',
+      location: {coordinates: [22, 23]},
     };
     await request(app)
         .post('/api/connectors')

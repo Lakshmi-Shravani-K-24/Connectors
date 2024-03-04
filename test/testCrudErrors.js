@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
 const {expect} = require('chai');
-const {createConnector, getConnectors, getConnectorById, getConnectorsByLocation, updateConnector, deleteConnector} = require('../controllers/connectorCrud.js');
+const {createConnector, getConnectors, getConnectorById, getConnectorsByLocation, updateConnector, deleteConnector} = require('../controllers/connectorCrud');
 
 describe('Connector CRUD Operation Negative Cases', () => {
   it('should throw error while creating connector', async () => {
     try {
       await createConnector(null); // Pass invalid data to intentionally cause an error
-    } catch (error) {
-      expect(error).to.exist;
-      expect(error.message).to.include('Connector validation failed');
+    } catch (createError) {
+      expect(createError).to.exist;
+      expect(createError.message).to.include('Connector validation failed');
     }
   });
 
@@ -16,9 +16,9 @@ describe('Connector CRUD Operation Negative Cases', () => {
   it('should throw error while getting connectors', async () => {
     try {
       await getConnectors(null); // Pass invalid query to intentionally cause an error
-    } catch (error) {
-      expect(error).to.exist;
-      expect(error.message).to.include('Invalid query');
+    } catch (getError) {
+      expect(getError).to.exist;
+      expect(getError.message).to.include('Invalid query');
     }
   });
 
@@ -26,7 +26,6 @@ describe('Connector CRUD Operation Negative Cases', () => {
     try {
       await getConnectorById(null); // Pass null to force error handling
     } catch (error) {
-      expect(error).to.exist;
       expect(error.message).to.include('Invalid connector ID');
     }
   });
@@ -42,9 +41,9 @@ describe('Connector CRUD Operation Negative Cases', () => {
   it('should throw error while updating connector', async () => {
     try {
       await updateConnector(null, null); // Pass invalid parameters to intentionally cause an error
-    } catch (error) {
-      expect(error).to.exist;
-      expect(error.message).to.include('Invalid parameters');
+    } catch (updateError) {
+      expect(updateError).to.exist;
+      expect(updateError.message).to.include('Invalid parameters');
     }
   });
 
@@ -52,9 +51,8 @@ describe('Connector CRUD Operation Negative Cases', () => {
   it('should throw error while deleting connector', async () => {
     try {
       await deleteConnector(null); // Pass invalid ID to intentionally cause an error
-    } catch (error) {
-      expect(error).to.exist;
-      expect(error.message).to.include('Invalid connector ID');
+    } catch (deleteError) {
+      expect(deleteError.message).to.include('Invalid connector ID');
     }
   });
 });
