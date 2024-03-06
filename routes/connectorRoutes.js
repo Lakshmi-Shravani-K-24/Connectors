@@ -30,22 +30,20 @@ router.get('/connectors', async (req, res) => {
 
 // Get a connector by ID
 router.get('/connectors/:id', async (req, res) => {
-  const connector = await getConnectorById(req.params.id);
-  if (!connector) {
+  const getConnectorByIdResponse = await getConnectorById(req.params.id);
+  if (!getConnectorByIdResponse) {
     console.log('Connector not found');
     return res.status(404).json({error: 'Connector not found'});
   }
-  res.json(connector);
+  res.json(getConnectorByIdResponse);
 });
 
 router.get('/connectors/connectorId/:connectorId', async (req, res) => {
-  const connector = await getConnectorByConnectorId(req.params.connectorId);
-  console.log(connector);
-  if (!connector) {
-    console.log('Connector not found');
+  const getConnectorByConnectorIdResponse = await getConnectorByConnectorId(req.params.connectorId);
+  if (!getConnectorByConnectorIdResponse) {
     return res.status(404).json({error: 'Connector not found'});
   }
-  res.json(connector);
+  res.json(getConnectorByConnectorIdResponse);
 });
 
 // Get connectors by location
