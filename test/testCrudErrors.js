@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const {expect} = require('chai');
-const {createConnector, getConnectors, getConnectorById, getConnectorsByLocation, updateConnector, deleteConnector} = require('../controllers/connectorCrud');
+const {createConnector, getConnectors, getConnectorById, getConnectorsByLocation, updateConnector, deleteConnector, getConnectorByConnectorId} = require('../controllers/connectorCrud');
 
 describe('Connector CRUD Operation Negative Cases', () => {
   it('should throw error while creating connector', async () => {
@@ -26,7 +26,14 @@ describe('Connector CRUD Operation Negative Cases', () => {
     try {
       await getConnectorById(null); // Pass null to force error handling
     } catch (error) {
-      expect(error.message).to.include('Invalid connector ID');
+      expect(error.message).to.include('Invalid ID');
+    }
+  });
+  it('should throw error while getting connector by connectorId', async () => {
+    try {
+      await getConnectorByConnectorId(null); // Pass null to force error handling
+    } catch (error) {
+      expect(error.message).to.include('Invalid connectorId');
     }
   });
   it('should throw error while getting connectors by location', async () => {

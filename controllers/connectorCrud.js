@@ -31,7 +31,7 @@ async function getConnectorById(connectorObjId) {
     const connector = await Connector.findById(connectorObjId);
     // Force error handling by throwing an error if the ID is null
     if (!connectorObjId) {
-      throw new Error('Invalid connector ID');
+      throw new Error('Invalid ID');
     }
     if (!connector) {
       return null;
@@ -42,6 +42,18 @@ async function getConnectorById(connectorObjId) {
     throw error;
   }
 }
+async function getConnectorByConnectorId(connectorId) {
+  try {
+    if (!connectorId) {
+      throw new Error('Invalid connectorId');
+    }
+    return await Connector.findOne({connectorId: connectorId});
+  } catch (error) {
+    console.error('Error getting connector by connectorID:', error.message);
+    throw error;
+  }
+}
+
 
 async function getConnectorsByLocation(latitude, longitude, maxDistance) {
   try {
@@ -100,6 +112,7 @@ module.exports = {
   createConnector,
   getConnectors,
   getConnectorById,
+  getConnectorByConnectorId,
   getConnectorsByLocation,
   updateConnector,
   deleteConnector,
