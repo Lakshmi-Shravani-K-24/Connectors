@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const {connectToDatabase}=require('./db');
 const connectorRoutes = require('./routes/connectorRoutes');
 
 function startServer(port) {
@@ -21,11 +20,6 @@ function stopServer(server) {
     console.log('Server stopped');
   });
 }
-const PORT=3000;
-const MONGO_URL='mongodb://127.0.0.1:27017/ChargeStationDB';
-
-startServer(PORT);
-connectToDatabase(MONGO_URL);
 
 module.exports = {
   startServer,
