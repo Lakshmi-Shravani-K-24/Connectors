@@ -6,33 +6,33 @@ const assert = require('assert');
 const sinon = require('sinon');
 const mongoose = require('mongoose');
 const {before, describe, it, after} = require('mocha');
-const {startServer, stopServer} = require('../index');
-const {connectToDatabase, closeDatabaseConnection} = require('../db');
+const {startServer, stopServer} = require('../index.js');
+const {connectToDatabase, closeDatabaseConnection}=require('../db');
 const {MongoMemoryServer} = require('mongodb-memory-server');
-require('dotenv').config();
+
 
 let mongoServer;
-let objectId;
 let app;
+let objectId;
+
 let consoleLogStub;
 let sampleConnectorId;
+
 before(async () => {
   consoleLogStub = sinon.stub(console, 'log');
   mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
-  process.env.MONGODB_URL = mongoUri;
-  await connectToDatabase(process.env.MONGODB_URL);
-  app = startServer();
+  connectToDatabase(mongoUri);
+  const PORT=3003;
+  app=startServer(PORT);
 });
+
 
 after(async () => {
   stopServer(app);
   await closeDatabaseConnection();
-  // Reset process.env.MONGODB_URL to the real MongoDB URL from .env file
-  process.env.MONGODB_URL = 'mongodb://127.0.0.1:27017/ChargeStationDB';
   consoleLogStub.restore();
 
-  // Assertions for server and database stopped messages
   sinon.assert.calledWith(consoleLogStub, 'Server stopped');
   sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
   nock.cleanAll();
