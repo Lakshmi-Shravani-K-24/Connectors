@@ -6,7 +6,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 const mongoose = require('mongoose');
 const {before, describe, it, after} = require('mocha');
-const {startServer, stopServer} = require('../index.js');
+const {startServer, stopServer} = require('../server');
 const {connectToDatabase, closeDatabaseConnection}=require('../db');
 const {MongoMemoryServer} = require('mongodb-memory-server');
 
