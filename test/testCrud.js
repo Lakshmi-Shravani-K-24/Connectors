@@ -15,7 +15,7 @@ const consoleLogStub = sinon.stub(console, 'log');
 
 const PORT=3003;
 const app=startServer(PORT);
-require('./testEnv');
+require('./preparation.js');
 
 
 describe('Server and Database Start Tests', function() {
