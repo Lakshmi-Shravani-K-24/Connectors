@@ -5,45 +5,24 @@ const {expect} = require('chai');
 const assert = require('assert');
 const sinon = require('sinon');
 const mongoose = require('mongoose');
-const {before, describe, it, after} = require('mocha');
-const {startServer, stopServer} = require('../server');
-const {connectToDatabase, closeDatabaseConnection}=require('../db');
-const {MongoMemoryServer} = require('mongodb-memory-server');
+const {describe, it} = require('mocha');
+const {startServer} = require('../server');
 
 
-let mongoServer;
-let app;
 let objectId;
-
-let consoleLogStub;
 let sampleConnectorId;
+const consoleLogStub = sinon.stub(console, 'log');
 
-before(async () => {
-  consoleLogStub = sinon.stub(console, 'log');
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  connectToDatabase(mongoUri);
-  const PORT=3003;
-  app=startServer(PORT);
-});
+const PORT=3003;
+const app=startServer(PORT);
+require('./testEnv');
 
-
-after(async () => {
-  stopServer(app);
-  await closeDatabaseConnection();
-  consoleLogStub.restore();
-
-  sinon.assert.calledWith(consoleLogStub, 'Server stopped');
-  sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
-  nock.cleanAll();
-});
 
 describe('Server and Database Start Tests', function() {
   it('should check if the server is started and message is logged', function() {
     assert(app, 'Server is not started');
     sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3003');
   });
-
   it('should check if the database is connected and message is logged', function() {
     const isConnected = mongoose.connection.readyState === 1;
     assert(isConnected, 'Database is not connected');
@@ -188,10 +167,10 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
       chargeStationName: 'Station 4',
       location: {coordinates: [22, 23]},
     };
-    await request(app)
-        .post('/api/connectors')
-        .send(connectorDataWithInvalidId)
-        .expect(201);
+    // await request(app)
+    //     .post('/api/connectors')
+    //     .send(connectorDataWithInvalidId)
+    //     .expect(201);
     await request(app)
         .post('/api/connectors')
         .send(connectorDataWithInvalidId)

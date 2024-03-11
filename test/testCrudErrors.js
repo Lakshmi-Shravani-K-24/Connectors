@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 const {expect} = require('chai');
+require('../index');
 const {createConnector, getConnectors, getConnectorById, getConnectorsByLocation, updateConnector, deleteConnector, getConnectorByConnectorId} = require('../controllers/connectorCrud');
 
 describe('Connector CRUD Operation Negative Cases', () => {
