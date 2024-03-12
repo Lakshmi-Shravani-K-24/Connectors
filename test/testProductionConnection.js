@@ -1,24 +1,16 @@
-const mongoose = require('mongoose');
-const sinon = require('sinon');
-const assert = require('assert');
-const {consoleLogStub}=require('./testCrud');
-const {describe, it} = require('mocha');
+const request = require('supertest');
+const {server} = require('../index');
+const {expect} = require('chai');
+const {closeDatabaseConnection} = require('../db');
+const {stopServer} = require('../server');
 
-
-const {app}=require('../index');
-
-
-describe('Production Server and Database Start Tests', function() {
-  it('should check if the production server is started and message is logged', function() {
-    assert(app, 'Production Server is not started');
-    sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3000');
+describe('Test / endpoint', async () => {
+  // Test the GET / endpoint
+  it('should return JSON message "Welcome to the home route!"', async () => {
+    const response = await request(server).get('/');
+    expect(response.status).to.equal(200);
+    expect(response.body).to.deep.equal({message: 'Welcome to the Connectors route!'});
   });
-  it('should check if the database is connected and message is logged', function() {
-    const isProductionDatabaseConnected = mongoose.connection.readyState === 1;
-    assert(isProductionDatabaseConnected, 'Production Database is not connected');
-    sinon.assert.calledWith(consoleLogStub, 'Connected to Database');
-    consoleLogStub.restore();
-  });
+  await closeDatabaseConnection();
+  stopServer();
 });
-
-

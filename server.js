@@ -2,8 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const connectorRoutes = require('./routes/connectorRoutes');
 
-let server; // Variable to store the server instance
-
+let server;
 function startServer(port) {
   const app = express();
   app.use(bodyParser.json());
@@ -14,7 +13,7 @@ function startServer(port) {
     console.log(`Server is listening on port ${port}`);
   });
 
-  return server;
+  return app;
 }
 
 function stopServer() {
@@ -27,5 +26,3 @@ module.exports = {
   startServer,
   stopServer,
 };
-
-

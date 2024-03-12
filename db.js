@@ -1,14 +1,17 @@
 const mongoose = require('mongoose');
 
-const mongoURL = process.env.MONGO_URL;
-
-const connectToDatabase = () => {
-  mongoose.connect(mongoURL)
-      .then(() => {
-        console.log(mongoURL);
-        console.log('Connected to Database');
-      });
+const connectToDatabase = async (mongoURL) => {
+  await mongoose.connect(mongoURL);
+  console.log(mongoURL);
+  console.log('Connected to Database');
 };
 
+const closeDatabaseConnection = async () => {
+  await mongoose.connection.close();
+  console.log('Disconnected from Database');
+};
 
-connectToDatabase();
+module.exports = {
+  connectToDatabase,
+  closeDatabaseConnection,
+};

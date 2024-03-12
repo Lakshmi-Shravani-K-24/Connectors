@@ -1,10 +1,14 @@
 
 const {startServer} = require('./server');
+const {connectToDatabase}=require('./db');
 
 const PORT=3000;
-process.env.MONGO_URL='mongodb://127.0.0.1:27017/ChargeStationDB';
+const MONGO_URL='mongodb://127.0.0.1:27017/ChargeStationDB';
 
-const app=startServer(PORT);
-require('./db');
+const server=startServer(PORT);
+connectToDatabase(MONGO_URL);
 
-module.exports={app};
+server.get('/', (req, res) => {
+  res.json({message: 'Welcome to the Connectors route!'});
+});
+module.exports={server};

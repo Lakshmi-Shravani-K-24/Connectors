@@ -5,17 +5,38 @@ const {expect} = require('chai');
 const assert = require('assert');
 const sinon = require('sinon');
 const mongoose = require('mongoose');
-const {describe, it} = require('mocha');
-const {startServer} = require('../server');
+const {before, describe, it, after} = require('mocha');
+const {startServer, stopServer} = require('../server');
+const {connectToDatabase, closeDatabaseConnection}=require('../db');
+const {MongoMemoryServer} = require('mongodb-memory-server');
 
 
+let mongoServer;
+let app;
 let objectId;
+
+let consoleLogStub;
 let sampleConnectorId;
 
-const consoleLogStub = sinon.stub(console, 'log');
-const PORT=3003;
-const app=startServer(PORT);
-require('../preparation.js');
+before(async () => {
+  consoleLogStub = sinon.stub(console, 'log');
+  mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
+  console.log(mongoUri);
+  connectToDatabase(mongoUri);
+  const PORT=3003;
+  app=startServer(PORT);
+});
+
+
+after(async () => {
+  stopServer();
+  await closeDatabaseConnection();
+  consoleLogStub.restore();
+  sinon.assert.calledWith(consoleLogStub, 'Server stopped');
+  sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
+  nock.cleanAll();
+});
 
 
 describe('Server and Database Start Tests', function() {
@@ -23,6 +44,7 @@ describe('Server and Database Start Tests', function() {
     assert(app, 'Server is not started');
     sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3003');
   });
+
   it('should check if the database is connected and message is logged', function() {
     const isConnected = mongoose.connection.readyState === 1;
     assert(isConnected, 'Database is not connected');
@@ -42,6 +64,7 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
   };
 
   it('should create a new connector', async () => {
+    consoleLogStub.restore();
     const createResponse = await request(app)
         .post('/api/connectors')
         .send(newConnectorData)
@@ -57,6 +80,7 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
         .get('/api/connectors')
         .expect(200);
     expect(getAllResponse.body).to.be.an('array').that.is.not.empty;
+    console.log(getAllResponse.body);
   });
 
   it('should get a connector by ID', async () => {
@@ -120,7 +144,6 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
     assert.ok(errorResponse.body.error);
   });
 
-
   it('should get connectors by location', async () => {
     const latitude =23; // Example latitude
     const longitude = 22; // Example longitude
@@ -174,7 +197,6 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
       chargeStationName: 'Station 4',
       location: {coordinates: [22, 23]},
     };
-
     const createresponse= await request(app)
         .post('/api/connectors')
         .send(connectorDataWithInvalidId)
@@ -188,7 +210,6 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
         .delete(`/api/connectors/${createdConnectorId}`)
         .expect(200);
   });
-
   it('should return an error if connectorId is missing', async () => {
     const connectorDataWithoutId = {
       type: 'Type 2',
@@ -213,4 +234,5 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
         .expect(404);
   });
 });
-module.exports={consoleLogStub};
+
+
