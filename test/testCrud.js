@@ -15,7 +15,7 @@ const consoleLogStub = sinon.stub(console, 'log');
 
 const PORT=3003;
 const app=startServer(PORT);
-require('./preparation.js');
+require('../preparation.js');
 
 
 describe('Server and Database Start Tests', function() {
@@ -167,7 +167,7 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
   it('should return an error if connectorId is not unique', async () => {
     // Create a connector with the same connectorId
     const connectorDataWithInvalidId = {
-      connectorId: '134',
+      connectorId: '139',
       type: 'Type B',
       status: 'Active',
       chargePointId: 'CS4CP002',
@@ -175,16 +175,20 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
       location: {coordinates: [22, 23]},
     };
 
-    // const response= await request(app)
-    //     .post('/api/connectors')
-    //     .send(connectorDataWithInvalidId)
-    //     .expect(201);
-    // console.log(response);
+    const createresponse= await request(app)
+        .post('/api/connectors')
+        .send(connectorDataWithInvalidId)
+        .expect(201);
+    const createdConnectorId=createresponse._body._id;
     await request(app)
         .post('/api/connectors')
         .send(connectorDataWithInvalidId)
         .expect(400);
+    await request(app)
+        .delete(`/api/connectors/${createdConnectorId}`)
+        .expect(200);
   });
+
   it('should return an error if connectorId is missing', async () => {
     const connectorDataWithoutId = {
       type: 'Type 2',
