@@ -11,8 +11,8 @@ const {startServer} = require('../server');
 
 let objectId;
 let sampleConnectorId;
-const consoleLogStub = sinon.stub(console, 'log');
 
+const consoleLogStub = sinon.stub(console, 'log');
 const PORT=3003;
 const app=startServer(PORT);
 require('../preparation.js');
@@ -213,3 +213,4 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
         .expect(404);
   });
 });
+module.exports={consoleLogStub};
