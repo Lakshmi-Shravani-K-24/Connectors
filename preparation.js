@@ -4,9 +4,6 @@ const {before, after} = require('mocha');
 const nock = require('nock');
 const {stopServer} = require('./server');
 const {dropDatabase, closeDatabaseConnection}=require('./closedb');
-// const sinon = require('sinon');
-// const {consoleLogStub}=require('./test/testCrud');
-
 let mongoServer;
 let mongoMemoryServerUrl;
 
@@ -24,9 +21,6 @@ after(async () => {
   stopServer();
   await dropDatabase();
   await closeDatabaseConnection();
-  // sinon.assert.calledWith(consoleLogStub, 'Server stopped');
-  // // sinon.assert.calledWith(consoleLogStub, 'Database dropped successfully');
-  // // sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
   nock.cleanAll();
 });
 module.exports={getMongoMemoryServerUrl};
