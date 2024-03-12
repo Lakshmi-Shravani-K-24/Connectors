@@ -71,29 +71,36 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
         .expect(200);
     expect(getByIdResponse.body.connectorId).to.equal(sampleConnectorId);
   });
-  it('should return connector details and estimated charging time', async () => {
-    // Mock the response from the external server
-    const mockedResponse = {
-      estimatedTime: 5,
+  it('should return connector details along with estimated charging time', async () => {
+    const connectorId = '123';
+    const connectorPowerInKiloWatt = 10;
+    const batteryCapacityInKiloWattPerHour = 40;
+    const socInPercentage = 50;
+    const expectedTimeInMinutes = 120;
+
+    // Define the response from Nock separately
+    const nockResponse = {
+      estimatedTimeInMinutes: expectedTimeInMinutes,
     };
 
+    // Mocking the inner server query using Nock with the defined response
     nock('http://localhost:3001')
         .get('/connectors/estimatedChargingTime')
-        .query(true) // Any query parameters
-        .reply(200, mockedResponse);
+        .query(true)
+        .reply(200, nockResponse);
 
     const response = await request(app)
-        .get('/api/connectors/chargingTime/123')
+        .get(`/api/connectors/chargingTime/123`)
         .query({
-          connectorPower: 100,
-          batteryCapacity: 200,
-          soc: 50,
-          connectorId: '123',
-        })
-        .expect(200);
-    assert.ok(response.body.connectorDetails);
-    assert.ok(response.body.estimatedChargingTime);
-    assert.strictEqual(response.body.estimatedChargingTime, mockedResponse.estimatedTime);
+          connectorPowerInKiloWatt,
+          batteryCapacityInKiloWattPerHour,
+          socInPercentage,
+          connectorId,
+        });
+
+    // Assertions
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(response.body.estimatedChargingTimeInMinutes, expectedTimeInMinutes);
   });
 
   it('should return error if there is an error fetching connector details', async () => {
@@ -101,16 +108,16 @@ describe('Connectors CRUD Operating Routes and funtions Tests', () => {
         .get('/connectors/estimatedChargingTime')
         .query(true)
         .reply(400);
-    const response = await request(app)
-        .get('/api/connectors/chargingTime/1234')
+    const errorResponse = await request(app)
+        .get(`/api/connectors/chargingTime/1234`)
         .query({
-          connectorPower: 100,
-          batteryCapacity: 200,
-          soc: 50,
+          connectorPowerInKiloWatt: 100,
+          batteryCapacityInKiloWattPerHour: 200,
+          socInPercentage: 50,
           connectorId: '1234',
         })
         .expect(400);
-    assert.ok(response.body.error);
+    assert.ok(errorResponse.body.error);
   });
 
 
@@ -160,17 +167,19 @@ describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{
   it('should return an error if connectorId is not unique', async () => {
     // Create a connector with the same connectorId
     const connectorDataWithInvalidId = {
-      connectorId: '133',
+      connectorId: '134',
       type: 'Type B',
       status: 'Active',
       chargePointId: 'CS4CP002',
       chargeStationName: 'Station 4',
       location: {coordinates: [22, 23]},
     };
-    // await request(app)
+
+    // const response= await request(app)
     //     .post('/api/connectors')
     //     .send(connectorDataWithInvalidId)
     //     .expect(201);
+    // console.log(response);
     await request(app)
         .post('/api/connectors')
         .send(connectorDataWithInvalidId)

@@ -68,20 +68,22 @@ router.delete('/connectors/:id', async (req, res) => {
 
 router.get('/connectors/chargingTime/:connectorId', async (req, res)=>{
   try {
-    const {connectorPower, batteryCapacity, soc, connectorId} = req.query;
+    const {connectorPowerInKiloWatt, batteryCapacityInKiloWattPerHour, socInPercentage, connectorId} = req.query;
     const connector = await getConnectorByConnectorId(connectorId);
     const response = await axios.get('http://localhost:3001/connectors/estimatedChargingTime', {
       params: {
-        connectorPower,
-        batteryCapacity,
-        soc,
+        connectorPowerInKiloWatt,
+        batteryCapacityInKiloWattPerHour,
+        socInPercentage,
       },
     });
-    const estimatedTime = response.data.estimatedTime;
+    const estimatedTime = response.data.estimatedTimeInMinutes;
     const result = {
       connectorDetails: connector,
-      estimatedChargingTime: estimatedTime,
+      connectorPowerInKiloWatt: connectorPowerInKiloWatt,
+      estimatedChargingTimeInMinutes: estimatedTime,
     };
+    console.log(result);
     res.json(result);
   } catch (error) {
     res.status(400).json({error: error.message});

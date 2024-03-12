@@ -7,8 +7,6 @@ const connectToDatabase = () => {
       .then(() => {
         console.log(mongoURL);
         console.log('Connected to Database');
-      }).catch((error) => {
-        console.error('Error connecting to database:', error);
       });
 };
 
