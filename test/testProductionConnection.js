@@ -10,10 +10,10 @@ describe('Testing Production server and Database', ()=>{
   before(async ()=>{
     server=require('../index');
   });
-  after(async () => {
-    const {closeDatabaseConnection}=require('../serverAndDbClose');
-    await closeDatabaseConnection();
-  });
+  // after(async () => {
+  //   const {closeDatabaseConnection}=require('../serverAndDbClose');
+  //   await closeDatabaseConnection();
+  // });
   describe('Production Server Start', function() {
     it('should check if the production server is started and message is logged', function() {
       assert(server, 'Production Server is not started');
