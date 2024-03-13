@@ -1,14 +1,16 @@
 const assert = require('assert');
+const sinon = require('sinon');
 const {describe, it, before, after} = require('mocha');
 
-
+let consoleLogStub;
 let server;
 // let mongoDbConnection;
 
 
 describe('Testing Production server and Database', () => {
   before(async ()=>{
-    ({server} = await require('../index.js'));
+    consoleLogStub = sinon.stub(console, 'log');
+    ({server} = require('../index.js'));
   });
   // describe('Database Connection', function() {
   //   it('should ensure database connection is established', function() {
@@ -21,10 +23,12 @@ describe('Testing Production server and Database', () => {
   describe('Production Server Start', function() {
     it('should check if the production server is started and message is logged', function() {
       assert(server, 'Production Server is not started');
+      sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3000');
     });
   });
   after(async ()=>{
     const {stopServer} = require('../serverAndDbClose');
     stopServer(server);
+    consoleLogStub.restore();
   });
 });
