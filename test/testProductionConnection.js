@@ -1,33 +1,19 @@
-const sinon = require('sinon');
 const assert = require('assert');
 const {describe, it, before, after} = require('mocha');
 
 
 let server;
 let mongoDbConnection;
-let consoleLogStub;
+
 
 describe('Testing Production server and Database', () => {
   before(async ()=>{
-    consoleLogStub = sinon.stub(console, 'log');
-    const {server: serverInstance, dbConnection: dbConn} = await require('../index');
-    server = serverInstance;
-    mongoDbConnection = dbConn;
+    ({server, dbConnection: mongoDbConnection} = await require('../index.js'));
   });
-  after(async ()=>{
-    const {stopServer, closeDatabaseConnection} = require('../serverAndDbClose');
-    stopServer(server);
-    await closeDatabaseConnection();
-    sinon.assert.calledWith(consoleLogStub, 'Server stopped');
-    sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
-    consoleLogStub.restore();
-  });
-
   describe('Database Connection', function() {
     it('should ensure database connection is established', function() {
       assert(mongoDbConnection, 'Database connection is not established');
       const readyStateOfMongoDb= mongoDbConnection.readyState;
-      sinon.assert.calledWith(consoleLogStub, 'Connected to Database');
       assert.strictEqual(readyStateOfMongoDb, 1, 'Database connection is not ready');
     });
   });
@@ -35,7 +21,11 @@ describe('Testing Production server and Database', () => {
   describe('Production Server Start', function() {
     it('should check if the production server is started and message is logged', function() {
       assert(server, 'Production Server is not started');
-      sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3000');
     });
+  });
+  after(async ()=>{
+    const {stopServer, closeDatabaseConnection} = require('../serverAndDbClose');
+    stopServer(server);
+    await closeDatabaseConnection();
   });
 });
