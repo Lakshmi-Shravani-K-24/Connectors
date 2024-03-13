@@ -8,15 +8,13 @@ let mongoDbConnection;
 let consoleLogStub;
 
 describe('Testing Production server and Database', () => {
-  before(async function() {
-    this.timeout(5000);
+  before(async ()=>{
     consoleLogStub = sinon.stub(console, 'log');
     const {server: serverInstance, dbConnection: dbConn} = await require('../index');
     server = serverInstance;
     mongoDbConnection = dbConn;
   });
-  after(async function() {
-    this.timeout(5000);
+  after(async ()=>{
     const {stopServer, closeDatabaseConnection} = require('../serverAndDbClose');
     stopServer(server);
     await closeDatabaseConnection();
