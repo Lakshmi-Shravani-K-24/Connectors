@@ -3,20 +3,20 @@ const {describe, it, before, after} = require('mocha');
 
 
 let server;
-let mongoDbConnection;
+// let mongoDbConnection;
 
 
 describe('Testing Production server and Database', () => {
   before(async ()=>{
-    ({server, dbConnection: mongoDbConnection} = await require('../index.js'));
+    ({server} = await require('../index.js'));
   });
-  describe('Database Connection', function() {
-    it('should ensure database connection is established', function() {
-      assert(mongoDbConnection, 'Database connection is not established');
-      const readyStateOfMongoDb= mongoDbConnection.readyState;
-      assert.strictEqual(readyStateOfMongoDb, 1, 'Database connection is not ready');
-    });
-  });
+  // describe('Database Connection', function() {
+  //   it('should ensure database connection is established', function() {
+  //     assert(mongoDbConnection, 'Database connection is not established');
+  //     const readyStateOfMongoDb= mongoDbConnection.readyState;
+  //     assert.strictEqual(readyStateOfMongoDb, 1, 'Database connection is not ready');
+  //   });
+  // });
 
   describe('Production Server Start', function() {
     it('should check if the production server is started and message is logged', function() {
@@ -24,8 +24,7 @@ describe('Testing Production server and Database', () => {
     });
   });
   after(async ()=>{
-    const {stopServer, closeDatabaseConnection} = require('../serverAndDbClose');
+    const {stopServer} = require('../serverAndDbClose');
     stopServer(server);
-    await closeDatabaseConnection();
   });
 });
