@@ -4,7 +4,7 @@ const {describe, it, before, after} = require('mocha');
 const {stopServer, closeDatabaseConnection} = require('../serverAndDbClose');
 
 let server;
-let dbConnection;
+let mongoDbConnection;
 let consoleLogStub;
 
 describe('Testing Production server and Database', () => {
@@ -12,7 +12,7 @@ describe('Testing Production server and Database', () => {
     consoleLogStub = sinon.stub(console, 'log');
     const {server: serverInstance, dbConnection: dbConn} = await require('../index');
     server = serverInstance;
-    dbConnection = dbConn;
+    mongoDbConnection = dbConn;
   });
   after(async function() {
     stopServer(server);
@@ -24,10 +24,10 @@ describe('Testing Production server and Database', () => {
 
   describe('Database Connection', function() {
     it('should ensure database connection is established', function() {
-      assert(dbConnection, 'Database connection is not established');
-      const readyState = dbConnection.readyState;
-      assert.strictEqual(readyState, 1, 'Database connection is not ready');
+      assert(mongoDbConnection, 'Database connection is not established');
+      const readyStateOfMongoDb= mongoDbConnection.readyState;
       sinon.assert.calledWith(consoleLogStub, 'Connected to Database');
+      assert.strictEqual(readyStateOfMongoDb, 1, 'Database connection is not ready');
     });
   });
 
