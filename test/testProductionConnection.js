@@ -1,7 +1,7 @@
 const sinon = require('sinon');
 const assert = require('assert');
 const {describe, it, before, after} = require('mocha');
-const {stopServer, closeDatabaseConnection} = require('../serverAndDbClose');
+
 
 let server;
 let mongoDbConnection;
@@ -9,12 +9,15 @@ let consoleLogStub;
 
 describe('Testing Production server and Database', () => {
   before(async function() {
+    this.timeout(5000);
     consoleLogStub = sinon.stub(console, 'log');
     const {server: serverInstance, dbConnection: dbConn} = await require('../index');
     server = serverInstance;
     mongoDbConnection = dbConn;
   });
   after(async function() {
+    this.timeout(5000);
+    const {stopServer, closeDatabaseConnection} = require('../serverAndDbClose');
     stopServer(server);
     await closeDatabaseConnection();
     sinon.assert.calledWith(consoleLogStub, 'Server stopped');
