@@ -1,28 +1,30 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const connectorRoutes = require('./routes/connectorRoutes');
 
-let server;
+// const mongoURL = process.env.MONGO_URL;
+
+const connectToDatabase = async (mongoURL) => {
+  await mongoose.connect(mongoURL);
+  console.log(mongoURL);
+  console.log('Connected to Database');
+};
+
+const app = express();
 function startServer(port) {
-  const app = express();
   app.use(bodyParser.json());
 
   app.use('/api', connectorRoutes);
 
-  server = app.listen(port, () => {
+  const server=app.listen(port, () => {
     console.log(`Server is listening on port ${port}`);
   });
 
-  return app;
-}
-
-function stopServer() {
-  server.close(() => {
-    console.log('Server stopped');
-  });
+  return server;
 }
 
 module.exports = {
+  connectToDatabase,
   startServer,
-  stopServer,
 };

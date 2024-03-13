@@ -28,11 +28,10 @@ async function getConnectors(query) {
 }
 async function getConnectorById(connectorObjId) {
   try {
-    const connector = await Connector.findById(connectorObjId);
-    // Force error handling by throwing an error if the ID is null
     if (!connectorObjId) {
       throw new Error('Invalid ID');
     }
+    const connector = await Connector.findById(connectorObjId);
     if (!connector) {
       return null;
     }
