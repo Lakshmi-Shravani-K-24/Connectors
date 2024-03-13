@@ -3,13 +3,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const connectorRoutes = require('./routes/connectorRoutes');
 
-// const mongoURL = process.env.MONGO_URL;
 
 const connectToDatabase = async (mongoURL) => {
   await mongoose.connect(mongoURL);
-  console.log(mongoURL);
   console.log('Connected to Database');
+  return mongoose.connection;
 };
+
 
 const app = express();
 function startServer(port) {
@@ -18,7 +18,7 @@ function startServer(port) {
   app.use('/api', connectorRoutes);
 
   const server=app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+    console.log( `Server is listening on port ${port}`);
   });
 
   return server;

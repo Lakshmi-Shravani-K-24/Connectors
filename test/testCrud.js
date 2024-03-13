@@ -4,7 +4,6 @@ const nock = require('nock');
 const {expect} = require('chai');
 const assert = require('assert');
 const sinon = require('sinon');
-const mongoose = require('mongoose');
 const {describe, before, after, it} = require('mocha');
 const {MongoMemoryServer} = require('mongodb-memory-server');
 
@@ -14,15 +13,16 @@ let sampleConnectorId;
 let mongoServer;
 let mongoMemoryServerUrl;
 let app;
-const consoleLogStub = sinon.stub(console, 'log');
-
+let consoleLogStub;
+let dbConnection;
 
 describe('Testing the CRUD  operations of Connectors', () => {
   before(async ()=>{
+    consoleLogStub = sinon.stub(console, 'log');
     mongoServer = await MongoMemoryServer.create();
     mongoMemoryServerUrl = mongoServer.getUri();
     const {startServer, connectToDatabase}=require('../serverAndDbStart');
-    await connectToDatabase(mongoMemoryServerUrl);
+    dbConnection=await connectToDatabase(mongoMemoryServerUrl);
     const PORT=3003;
     app=startServer(PORT);
   });
@@ -31,6 +31,7 @@ describe('Testing the CRUD  operations of Connectors', () => {
     await stopServer(app);
     await dropDatabase();
     await closeDatabaseConnection();
+    consoleLogStub.restore();
     sinon.assert.calledWith(consoleLogStub, 'Server stopped');
     sinon.assert.calledWith(consoleLogStub, 'Database dropped successfully');
     sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
@@ -44,8 +45,8 @@ describe('Testing the CRUD  operations of Connectors', () => {
       sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3003');
     });
     it('should check if the database is connected and message is logged', function() {
-      const isConnected = mongoose.connection.readyState === 1;
-      assert(isConnected, 'Database is not connected');
+      const readyState = dbConnection.readyState;
+      assert.strictEqual(readyState, 1, 'Database connection is not ready');
       sinon.assert.calledWith(consoleLogStub, 'Connected to Database');
     });
   });
@@ -234,4 +235,3 @@ describe('Testing the CRUD  operations of Connectors', () => {
     });
   });
 });
-module.exports={consoleLogStub};
