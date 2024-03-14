@@ -7,7 +7,7 @@ let server;
 // let mongoDbConnection;
 
 
-describe('Testing Production server and Database', () => {
+describe('Testing Production server', () => {
   before(async ()=>{
     consoleLogStub = sinon.stub(console, 'log');
     ({server} = require('../index.js'));
@@ -26,6 +26,13 @@ describe('Testing Production server and Database', () => {
       sinon.assert.calledWith(consoleLogStub, 'Server is listening on port 3000');
     });
   });
+  describe('Index.js Module Exports', function() {
+    it('should throw an error if module.exports is empty or not assigned properly', function() {
+      const exportedModule = require('../index.js');
+      assert(Object.keys(exportedModule).length > 0, 'Expected module.exports to be non-empty');
+    });
+  });
+
   after(async ()=>{
     const {stopServer} = require('../serverAndDbClose');
     stopServer(server);
