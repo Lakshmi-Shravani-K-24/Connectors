@@ -32,9 +32,6 @@ async function getConnectorById(connectorObjId) {
       throw new Error('Invalid ID');
     }
     const connector = await Connector.findById(connectorObjId);
-    if (!connector) {
-      return null;
-    }
     return connector;
   } catch (error) {
     console.error('Error getting connector by ID:', error.message);

@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /* eslint-disable max-len */
 const express = require('express');
 const router = express.Router();
@@ -66,28 +67,52 @@ router.delete('/connectors/:id', async (req, res) => {
   res.json(await deleteConnector(req.params.id));
 });
 
-router.get('/connectors/chargingTime/:connectorId', async (req, res)=>{
+router.get('/connectors/chargingTime/:connectorId', async (req, res) => {
   try {
-    const {connectorPowerInKiloWatt, batteryCapacityInKiloWattPerHour, socInPercentage, connectorId} = req.query;
+    const {batteryCapacityInKiloWattPerHour, socInPercentage, connectorId} = req.query;
+
+    if (!batteryCapacityInKiloWattPerHour || !socInPercentage || !connectorId ) {
+      throw new Error('Incomplete data. Please provide all required parameters.');
+    }
+
     const connector = await getConnectorByConnectorId(connectorId);
-    const response = await axios.get('http://localhost:3001/connectors/estimatedChargingTime', {
-      params: {
-        connectorPowerInKiloWatt,
-        batteryCapacityInKiloWattPerHour,
-        socInPercentage,
-      },
-    });
-    const estimatedTime = response.data.estimatedTimeInMinutes;
+    if (!connector) {
+      return res.status(404).json({error: 'Connector not found.'});
+    }
+
+    const {connectorPowerInKiloWatt} = connector; // Extract connectorPowerInKiloWatt from connector
+    const connectorPowerWithUnit = `${connectorPowerInKiloWatt}KW`;
+    let estimatedTime;
+    try {
+      const response = await axios.get('http://localhost:3001/connectors/estimatedChargingTime', {
+        params: {
+          connectorPowerInKiloWatt: connectorPowerWithUnit,
+          batteryCapacityInKiloWattPerHour,
+          socInPercentage,
+        },
+        timeout: 5000,
+      });
+      estimatedTime = response.data.estimatedTimeInMinutes;
+    } catch (error) {
+      throw new Error('Internal Server Error: Estimation server is not working properly');
+    }
+
     const result = {
       connectorDetails: connector,
-      connectorPowerInKiloWatt: connectorPowerInKiloWatt,
+      batteryDetails: {socInPercentage,
+        batteryCapacityInKiloWattPerHour,
+      },
       estimatedChargingTimeInMinutes: estimatedTime,
     };
-    console.log(result);
     res.json(result);
   } catch (error) {
-    res.status(400).json({error: error.message});
+    if (error.message.startsWith('Incomplete data')) {
+      res.status(400).json({error: error.message});
+    } else {
+      res.status(500).json({error: error.message});
+    }
   }
 });
+
 module.exports = router;
 

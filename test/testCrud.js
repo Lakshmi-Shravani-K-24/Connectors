@@ -4,7 +4,7 @@ const nock = require('nock');
 const {expect} = require('chai');
 const assert = require('assert');
 const sinon = require('sinon');
-const {describe, before, after, it} = require('mocha');
+const {describe, before, it} = require('mocha');
 const {MongoMemoryServer} = require('mongodb-memory-server');
 
 
@@ -35,7 +35,6 @@ describe('Testing the CRUD  operations of Connectors', () => {
     sinon.assert.calledWith(consoleLogStub, 'Server stopped');
     sinon.assert.calledWith(consoleLogStub, 'Database dropped successfully');
     sinon.assert.calledWith(consoleLogStub, 'Disconnected from Database');
-    nock.cleanAll();
   });
 
 
@@ -92,60 +91,10 @@ describe('Testing the CRUD  operations of Connectors', () => {
           .expect(200);
       expect(getByIdResponse.body.connectorId).to.equal(sampleConnectorId);
     });
-    it('should return connector details along with estimated charging time', async () => {
-      const connectorId = '123';
-      const connectorPowerInKiloWatt = 10;
-      const batteryCapacityInKiloWattPerHour = 40;
-      const socInPercentage = 50;
-      const expectedTimeInMinutes = 120;
-
-      // Define the response from Nock separately
-      const nockResponse = {
-        estimatedTimeInMinutes: expectedTimeInMinutes,
-      };
-
-      // Mocking the inner server query using Nock with the defined response
-      nock('http://localhost:3001')
-          .get('/connectors/estimatedChargingTime')
-          .query(true)
-          .reply(200, nockResponse);
-
-      const response = await request(app)
-          .get(`/api/connectors/chargingTime/123`)
-          .query({
-            connectorPowerInKiloWatt,
-            batteryCapacityInKiloWattPerHour,
-            socInPercentage,
-            connectorId,
-          });
-
-      // Assertions
-      assert.strictEqual(response.status, 200);
-      assert.strictEqual(response.body.estimatedChargingTimeInMinutes, expectedTimeInMinutes);
-    });
-
-    it('should return error if there is an error fetching connector details', async () => {
-      nock('http://localhost:3001')
-          .get('/connectors/estimatedChargingTime')
-          .query(true)
-          .reply(400);
-      const errorResponse = await request(app)
-          .get(`/api/connectors/chargingTime/1234`)
-          .query({
-            connectorPowerInKiloWatt: 100,
-            batteryCapacityInKiloWattPerHour: 200,
-            socInPercentage: 50,
-            connectorId: '1234',
-          })
-          .expect(400);
-      assert.ok(errorResponse.body.error);
-    });
-
-
     it('should get connectors by location', async () => {
-      const latitude =23; // Example latitude
-      const longitude = 22; // Example longitude
-      const maxDistance = 100; // Example max distance in meters
+      const latitude =23;
+      const longitude = 22;
+      const maxDistance = 100;
 
       const getByLocationResponse = await request(app)
           .get(`/api/connectors/location/${latitude}/${longitude}/${maxDistance}`)
@@ -164,12 +113,83 @@ describe('Testing the CRUD  operations of Connectors', () => {
           .expect(200);
       expect(updateResponse.body).to.deep.include(updatedConnectorData);
     });
-    it('should delete a connector by ID', async () => {
-      const deleteResponse = await request(app)
-          .delete(`/api/connectors/${objectId}`)
-          .expect(200);
-      assert(deleteResponse, 'Database is not connected');
-      expect(deleteResponse.body._id).to.equal(objectId);
+
+    describe('Testing of estimation server', () => {
+      const commonParams = {
+        batteryCapacityInKiloWattPerHour: 40,
+        socInPercentage: 50,
+        connectorId: '123',
+      };
+
+      afterEach(() => {
+        nock.cleanAll();
+      });
+
+      it('should return connector details along with estimated charging time', async () => {
+        const expectedTimeInMinutes = 120;
+        const nockResponse = {
+          estimatedTimeInMinutes: expectedTimeInMinutes,
+        };
+
+        nock('http://localhost:3001')
+            .get('/connectors/estimatedChargingTime')
+            .query(true)
+            .reply(200, nockResponse);
+
+        const response = await request(app)
+            .get(`/api/connectors/chargingTime/${commonParams.connectorId}`)
+            .query(commonParams);
+        console.log(response.body);
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.body.estimatedChargingTimeInMinutes, expectedTimeInMinutes);
+      });
+
+      it('should return error with 404 if the connector with given connectorId is not found', async () => {
+        nock('http://localhost:3001')
+            .get('/connectors/estimatedChargingTime')
+            .query(true)
+            .replyWithError(404, 'connector not found');
+        const notFoundResponse=await request(app)
+            .get(`/api/connectors/chargingTime/12345`)
+            .query({
+              batteryCapacityInKiloWattPerHour: commonParams.batteryCapacityInKiloWattPerHour,
+              socInPercentage: commonParams.socInPercentage,
+              connectorId: '12345',
+            });
+
+        expect(notFoundResponse.status).to.equal(404);
+        expect(notFoundResponse.body).to.have.property('error');
+      });
+
+      it('should respond with 400 if one or more required parameters are missing', async () => {
+        const missingParameterResponse = await request(app)
+            .get(`/api/connectors/chargingTime/${commonParams.connectorId}`);
+
+        expect(missingParameterResponse.status).to.equal(400);
+        expect(missingParameterResponse.body).to.have.property('error');
+      });
+
+      it('should respond with 500 if estimation server is not responding', async () => {
+        nock('http://localhost:3001')
+            .get('/connectors/estimatedChargingTime')
+            .query(true)
+            .replyWithError(500, 'Estimation server is not responding');
+        const serverOffResponse=await request(app)
+            .get(`/api/connectors/chargingTime/${commonParams.connectorId}`)
+            .query(commonParams);
+        expect(serverOffResponse.status).to.equal(500);
+        expect(serverOffResponse.body).to.have.property('error');
+      });
+    });
+
+    describe('Deleting a connector by ID', () => {
+      it('should delete a connector by ID', async () => {
+        const deleteResponse = await request(app)
+            .delete(`/api/connectors/${objectId}`)
+            .expect(200);
+        assert(deleteResponse, 'Database is not connected');
+        expect(deleteResponse.body._id).to.equal(objectId);
+      });
     });
   });
   describe('Test Negative Cases of CRUD Operating Routes and Functions', ()=>{

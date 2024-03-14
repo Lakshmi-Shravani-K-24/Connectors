@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const connectorSchema = new mongoose.Schema({
   connectorId: {type: String, unique: true, required: true},
   type: {type: String, required: true},
-  wattage: {type: Number, default: 240}, // Default value set to 240V
+  connectorPowerInKiloWatt: {type: Number, default: '10'}, // Default value set to 10KW
   manufacturer: String,
   status: {type: String, required: true},
   chargePointId: {type: String, required: true},
