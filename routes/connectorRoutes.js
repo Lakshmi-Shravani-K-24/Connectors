@@ -81,12 +81,11 @@ router.get('/connectors/chargingTime/:connectorId', async (req, res) => {
     }
 
     const {connectorPowerInKiloWatt} = connector; // Extract connectorPowerInKiloWatt from connector
-    const connectorPowerWithUnit = `${connectorPowerInKiloWatt}KW`;
     let estimatedTime;
     try {
       const response = await axios.get('http://localhost:3001/connectors/estimatedChargingTime', {
         params: {
-          connectorPowerInKiloWatt: connectorPowerWithUnit,
+          connectorPowerInKiloWatt,
           batteryCapacityInKiloWattPerHour,
           socInPercentage,
         },

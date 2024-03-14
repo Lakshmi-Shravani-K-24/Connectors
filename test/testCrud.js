@@ -28,7 +28,7 @@ describe('Testing the CRUD  operations of Connectors', () => {
   });
   after(async () => {
     const {stopServer, dropDatabase, closeDatabaseConnection}=require('../serverAndDbClose');
-    await stopServer(app);
+    stopServer(app);
     await dropDatabase();
     await closeDatabaseConnection();
     consoleLogStub.restore();
@@ -244,8 +244,9 @@ describe('Testing the CRUD  operations of Connectors', () => {
           .expect(400);
     });
     it('should return  error if connector with given ID is not found', async () => {
+      const nonExistentId='00f0f000fff0f000f000fff0';
       await request(app)
-          .get(`/api/connectors/${objectId}`)
+          .get(`/api/connectors/${nonExistentId}`)
           .expect(404);
     });
     it('should return  error if connector with given connectorID is not found', async () => {
