@@ -83,7 +83,7 @@ router.get('/connectors/chargingTime/:connectorId', async (req, res) => {
     const {connectorPowerInKiloWatt} = connector; // Extract connectorPowerInKiloWatt from connector
     let estimatedTime;
     try {
-      const response = await axios.get('http://localhost:3001/connectors/estimatedChargingTime', {
+      const response = await axios.get('http://estimate:3001/connectors/estimatedChargingTime', {
         params: {
           connectorPowerInKiloWatt,
           batteryCapacityInKiloWattPerHour,
@@ -93,6 +93,7 @@ router.get('/connectors/chargingTime/:connectorId', async (req, res) => {
       });
       estimatedTime = response.data.estimatedTimeInMinutes;
     } catch (error) {
+      console.log(error);
       throw new Error('Internal Server Error: Estimation server is not working properly');
     }
 

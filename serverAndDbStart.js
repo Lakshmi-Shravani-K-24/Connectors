@@ -3,13 +3,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const connectorRoutes = require('./routes/connectorRoutes');
 
-
 const connectToDatabase = async (mongoURL) => {
   await mongoose.connect(mongoURL);
   console.log('Connected to Database');
   return mongoose.connection;
 };
-
 
 const app = express();
 function startServer(port) {
