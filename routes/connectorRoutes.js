@@ -80,7 +80,7 @@ router.get('/connectors/chargingTime/:connectorId', async (req, res) => {
       return res.status(404).json({error: 'Connector not found.'});
     }
 
-    const {connectorPowerInKiloWatt} = connector; // Extract connectorPowerInKiloWatt from connector
+    const {connectorPowerInKiloWatt} = connector;
     let estimatedTime;
     try {
       const response = await axios.get('http://estimate:3001/connectors/estimatedChargingTime', {

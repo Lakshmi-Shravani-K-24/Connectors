@@ -131,7 +131,7 @@ describe('Testing the CRUD  operations of Connectors', () => {
           estimatedTimeInMinutes: expectedTimeInMinutes,
         };
 
-        nock('http://localhost:3001')
+        nock('http://estimate:3001')
             .get('/connectors/estimatedChargingTime')
             .query(true)
             .reply(200, nockResponse);
@@ -145,7 +145,7 @@ describe('Testing the CRUD  operations of Connectors', () => {
       });
 
       it('should return error with 404 if the connector with given connectorId is not found', async () => {
-        nock('http://localhost:3001')
+        nock('http://estimate:3001')
             .get('/connectors/estimatedChargingTime')
             .query(true)
             .replyWithError(404, 'connector not found');
@@ -170,7 +170,7 @@ describe('Testing the CRUD  operations of Connectors', () => {
       });
 
       it('should respond with 500 if estimation server is not responding', async () => {
-        nock('http://localhost:3001')
+        nock('http://estimate:3001')
             .get('/connectors/estimatedChargingTime')
             .query(true)
             .replyWithError(500, 'Estimation server is not responding');
